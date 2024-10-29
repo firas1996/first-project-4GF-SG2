@@ -14,6 +14,7 @@ const userSchema = new mongoose.Schema({
   created_at: {
     type: Date,
     default: Date.now(),
+    select: false,
   },
 });
 
