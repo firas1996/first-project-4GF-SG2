@@ -1,0 +1,8 @@
+[
+  { "id": 1, "name": "TV", "price": 123.5 },
+  { "id": 2, "name": "Phone", "price": 678 },
+  { "id": 3, "name": "Parfum", "price": 199.9 },
+  { "id": 4, "name": "PC", "price": 3456 },
+  { "id": 5, "name": "test", "price": 1111 },
+  { "id": 6, "name": "test", "price": 1111 }
+]
