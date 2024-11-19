@@ -23,13 +23,22 @@ exports.getAllUsers = async (req, res) => {
     // 1) Filter
     console.log(req.query);
     let queryObj = { ...req.query };
+    const excludedFields = ["sort"];
+    excludedFields.forEach((el) => delete queryObj[el]);
     // const users = await User.find().where("name").equals(req.query.name);
     let queryStr = JSON.stringify(queryObj);
     queryStr = queryStr.replace(/\b(lt|lte|gt|gte)\b/g, (opt) => `$${opt}`);
 
+    console.log("ss");
+    let query = User.find(JSON.parse(queryStr));
     // 2) Sort
-
-    const users = await User.find(JSON.parse(queryStr));
+    if (req.query.sort) {
+      const sortBy = req.query.sort.split(",").join(" ");
+      query = query.sort(sortBy);
+    } else {
+      query = query.sort("-created_at");
+    }
+    const users = await query;
     res.status(200).json({
       status: "success",
       results: users.length,
