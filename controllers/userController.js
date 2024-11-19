@@ -23,7 +23,7 @@ exports.getAllUsers = async (req, res) => {
     // 1) Filter
     console.log(req.query);
     let queryObj = { ...req.query };
-    const excludedFields = ["sort"];
+    const excludedFields = ["sort", "page", "limit"];
     excludedFields.forEach((el) => delete queryObj[el]);
     // const users = await User.find().where("name").equals(req.query.name);
     let queryStr = JSON.stringify(queryObj);
@@ -31,13 +31,28 @@ exports.getAllUsers = async (req, res) => {
 
     console.log("ss");
     let query = User.find(JSON.parse(queryStr));
+
     // 2) Sort
+
     if (req.query.sort) {
       const sortBy = req.query.sort.split(",").join(" ");
       query = query.sort(sortBy);
     } else {
       query = query.sort("-created_at");
     }
+
+    // 3) Pagination:
+    const page = req.query.page * 1 || 1;
+    const limit = req.query.limit * 1 || 3;
+    const skip = (page - 1) * limit;
+    query = query.skip(skip).limit(limit);
+    if (req.query.page) {
+      const nbrUsers = await User.countDocuments();
+      if (skip >= nbrUsers) {
+        console.log("you have passed the limit !!!");
+      }
+    }
+
     const users = await query;
     res.status(200).json({
       status: "success",
