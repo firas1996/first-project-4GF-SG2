@@ -21,8 +21,9 @@ exports.createUser = async (req, res) => {
 exports.getAllUsers = async (req, res) => {
   try {
     console.log(req.query);
+    let queryObj = { ...req.query };
     // const users = await User.find().where("name").equals(req.query.name);
-    const users = await User.find({ name: req.query.name });
+    const users = await User.find(queryObj);
     res.status(200).json({
       status: "success",
       results: users.length,
