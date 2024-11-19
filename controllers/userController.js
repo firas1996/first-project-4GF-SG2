@@ -20,10 +20,16 @@ exports.createUser = async (req, res) => {
 
 exports.getAllUsers = async (req, res) => {
   try {
+    // 1) Filter
     console.log(req.query);
     let queryObj = { ...req.query };
     // const users = await User.find().where("name").equals(req.query.name);
-    const users = await User.find(queryObj);
+    let queryStr = JSON.stringify(queryObj);
+    queryStr = queryStr.replace(/\b(lt|lte|gt|gte)\b/g, (opt) => `$${opt}`);
+
+    // 2) Sort
+
+    const users = await User.find(JSON.parse(queryStr));
     res.status(200).json({
       status: "success",
       results: users.length,
