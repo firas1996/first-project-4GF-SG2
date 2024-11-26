@@ -1,3 +1,4 @@
+const { signup } = require("../controllers/authController");
 const {
   createUser,
   deleteUser,
@@ -7,6 +8,7 @@ const {
 } = require("../controllers/userController");
 const express = require("express");
 const router = express.Router();
+router.post("/signup", signup);
 
 router.route("/").get(getAllUsers).post(createUser);
 
