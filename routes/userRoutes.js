@@ -1,4 +1,9 @@
-const { signup, login, protectorMW } = require("../controllers/authController");
+const {
+  signup,
+  login,
+  protectorMW,
+  permitMW,
+} = require("../controllers/authController");
 const {
   createUser,
   deleteUser,
@@ -11,7 +16,10 @@ const router = express.Router();
 router.post("/signup", signup);
 router.post("/login", login);
 
-router.route("/").get(protectorMW, getAllUsers).post(createUser);
+router
+  .route("/")
+  .get(protectorMW, permitMW("user", "admin"), getAllUsers)
+  .post(createUser);
 
 router.route("/:id").get(getUserById).patch(updateUser).delete(deleteUser);
 

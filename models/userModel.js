@@ -32,6 +32,8 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
+    enum: ["user", "admin"],
+    default: "user",
   },
   age: {
     type: Number,
@@ -40,6 +42,11 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now(),
     select: false,
+  },
+  pass_update_date: {
+    type: Date,
+    default: Date.now(),
+    // select: false,
   },
 });
 
@@ -52,6 +59,13 @@ userSchema.pre("save", async function (next) {
 
 userSchema.methods.matchPass = async function (entredPass, storedPass) {
   return await bcrypt.compare(entredPass, storedPass);
+};
+
+userSchema.methods.passTimestemp = function (JWTiat) {
+  const passTime = parseInt(this.pass_update_date.getTime() / 1000);
+  console.log(JWTiat);
+  console.log(passTime);
+  return JWTiat < passTime;
 };
 
 const User = mongoose.model("User", userSchema);

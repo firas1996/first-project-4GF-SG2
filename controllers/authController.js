@@ -1,5 +1,6 @@
 const User = require("../models/userModel");
 const jwt = require("jsonwebtoken");
+const { promisify } = require("util");
 const createToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET_KEY, {
     expiresIn: process.env.JWT_EXPIRES_IN,
@@ -13,7 +14,6 @@ exports.signup = async (req, res) => {
       email,
       password,
       confirmPassword,
-      role,
       age,
     });
     const token = createToken(newUser._id);
@@ -67,14 +67,47 @@ exports.login = async (req, res, next) => {
 
 exports.protectorMW = async (req, res, next) => {
   try {
-    // 1)
+    let token;
+    // 1) bech nthabat si el user b3athli token ou bien non ?
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
+    }
+    if (!token) {
+      return res.status(401).json({
+        status: "fail",
+        message: "you are not logged in !!!!",
+      });
+    }
+    // 2) thabat si token valid wala lé
 
-    // 2)
+    const decodage = await promisify(jwt.verify)(
+      token,
+      process.env.JWT_SECRET_KEY
+    );
+    console.log(decodage);
+    // 3) thabat si el user mizel mawjoud wala lé
 
-    // 3)
+    const theUser = await User.findById(decodage.id);
 
-    // 4)
+    if (!theUser) {
+      return res.status(401).json({
+        status: "fail",
+        message: "user not found !!!!",
+      });
+    }
 
+    // 4)  chouf el user badal el pass ba3d ma sna3 token wala lé
+    // console.log(theUser.passTimestemp(decodage.iat));
+    if (theUser.passTimestemp(decodage.iat)) {
+      return res.status(401).json({
+        status: "fail",
+        message: "token no longer valid !!!!",
+      });
+    }
+    req.user = theUser;
     next();
   } catch (error) {
     res.status(400).json({
@@ -82,4 +115,24 @@ exports.protectorMW = async (req, res, next) => {
       message: error,
     });
   }
+};
+
+exports.permitMW = (...roles) => {
+  return async (req, res, next) => {
+    try {
+      if (!roles.includes(req.user.role)) {
+        return res.status(401).json({
+          status: "fail",
+          message: "you do not have the permission to do this !!!!",
+        });
+      }
+
+      next();
+    } catch (error) {
+      res.status(400).json({
+        status: "fail",
+        message: error,
+      });
+    }
+  };
 };
