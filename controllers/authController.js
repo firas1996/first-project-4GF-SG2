@@ -64,3 +64,22 @@ exports.login = async (req, res, next) => {
     });
   }
 };
+
+exports.protectorMW = async (req, res, next) => {
+  try {
+    // 1)
+
+    // 2)
+
+    // 3)
+
+    // 4)
+
+    next();
+  } catch (error) {
+    res.status(400).json({
+      status: "fail",
+      message: error,
+    });
+  }
+};
